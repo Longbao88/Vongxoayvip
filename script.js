@@ -1,5 +1,4 @@
 
-const accountsUsed = JSON.parse(localStorage.getItem("accountsUsed") || "[]");
 const prizes = ["Xe SH Mode", "8888k", "888k", "88k", "188k", "388k", "58k", "38k", "18k"];
 const weights = [0, 0, 0, 5, 1, 1, 9, 15, 70];
 
@@ -47,7 +46,7 @@ function getRandomPrizeIndex() {
   return weights.length - 1;
 }
 
-document.getElementById("spin-btn").addEventListener("click", () => {
+document.getElementById("spin-btn").addEventListener("click", async () => {
   if (isSpinning) return;
 
   const input = document.getElementById("account-input");
@@ -59,40 +58,77 @@ document.getElementById("spin-btn").addEventListener("click", () => {
     msg.style.color = "orange";
     return;
   }
-  if (accountsUsed.includes(username)) {
+
+  // Kiểm tra tài khoản đã quay chưa
+  msg.textContent = "Đang kiểm tra tài khoản...";
+  msg.style.color = "#fff";
+
+  const response = await fetch("https://script.google.com/macros/s/AKfycbw2WWW5lWYuQCnQ4xjpzVDKcL1pYUnNONrNjK6gUirdBc8FLYqHFvBXssHnpnVQzul8IQ/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ username: username, reward: "" })
+  });
+  const result = await response.text();
+
+  if (result === "EXISTS") {
     msg.textContent = "Tài khoản này đã quay!";
     msg.style.color = "red";
     return;
   }
 
-  const prizeIndex = getRandomPrizeIndex();
-  const turns = 3 + Math.floor(Math.random() * 3);
-  const degPerSegment = 360 / numSegments;
-  const rotateTo = 360 * turns + (360 - prizeIndex * degPerSegment - degPerSegment / 2);
-  currentRotation += rotateTo;
+  // Phát nhạc
+  const sound = document.getElementById("spin-sound");
+  if (sound) sound.play();
 
-  canvas.style.transition = "transform 4s ease-out";
-  canvas.style.transform = "rotate(" + currentRotation + "deg)";
+  // Bắt đầu đếm ngược
+  const countdownEl = document.getElementById("countdown");
+  countdownEl.style.display = "block";
+  let count = 3;
+  countdownEl.textContent = count;
+  const countdownInterval = setInterval(() => {
+    count--;
+    if (count === 0) {
+      clearInterval(countdownInterval);
+      countdownEl.style.display = "none";
+      const prizeIndex = getRandomPrizeIndex();
+      const turns = 3 + Math.floor(Math.random() * 3);
+      const degPerSegment = 360 / numSegments;
+      const rotateTo = 360 * turns + (360 - prizeIndex * degPerSegment - degPerSegment / 2);
+      currentRotation += rotateTo;
+      canvas.style.transition = "transform 4s ease-out";
+      canvas.style.transform = "rotate(" + currentRotation + "deg)";
+      isSpinning = true;
 
-  isSpinning = true;
-  accountsUsed.push(username);
-  localStorage.setItem("accountsUsed", JSON.stringify(accountsUsed));
+      // tạo xu
+      for (let i = 0; i < 20; i++) {
+        const coin = document.createElement("div");
+        coin.className = "coin";
+        coin.style.left = Math.random() * 100 + 20 + "vw";
+        coin.style.animationDelay = (Math.random() * 1.5) + "s";
+        document.body.appendChild(coin);
+        setTimeout(() => coin.remove(), 2000);
+      }
 
-  canvas.addEventListener("transitionend", () => {
-    isSpinning = false;
-    msg.textContent = "Chúc mừng " + username + "! Bạn nhận được " + prizes[prizeIndex] + "!";
-    msg.style.color = "#ffd700";
+      canvas.addEventListener("transitionend", () => {
+        isSpinning = false;
+        msg.textContent = "Chúc mừng " + username + "! Bạn nhận được " + prizes[prizeIndex] + "!";
+        msg.style.color = "#ffd700";
 
-    // Gửi dữ liệu tới Google Sheets
-    fetch("https://script.google.com/macros/s/AKfycbw2WWW5lWYuQCnQ4xjpzVDKcL1pYUnNONrNjK6gUirdBc8FLYqHFvBXssHnpnVQzul8IQ/exec", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username: username,
-        reward: prizes[prizeIndex]
-      })
-    });
-  }, { once: true });
+        fetch("https://script.google.com/macros/s/AKfycbw2WWW5lWYuQCnQ4xjpzVDKcL1pYUnNONrNjK6gUirdBc8FLYqHFvBXssHnpnVQzul8IQ/exec", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username: username,
+            reward: prizes[prizeIndex]
+          })
+        });
+      }, { once: true });
+    } else {
+      countdownEl.textContent = count;
+    }
+  }, 1000);
 });
