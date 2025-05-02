@@ -72,7 +72,7 @@ document.getElementById("spin-btn").addEventListener("click", () => {
   currentRotation += rotateTo;
 
   canvas.style.transition = "transform 4s ease-out";
-  canvas.style.transform = `rotate(${currentRotation}deg)`;
+  canvas.style.transform = "rotate(" + currentRotation + "deg)";
 
   isSpinning = true;
   accountsUsed.push(username);
@@ -80,7 +80,19 @@ document.getElementById("spin-btn").addEventListener("click", () => {
 
   canvas.addEventListener("transitionend", () => {
     isSpinning = false;
-    msg.textContent = `Chúc mừng ${username}! Bạn nhận được ${prizes[prizeIndex]}!`;
+    msg.textContent = "Chúc mừng " + username + "! Bạn nhận được " + prizes[prizeIndex] + "!";
     msg.style.color = "#ffd700";
+
+    // Gửi dữ liệu tới Google Sheets
+    fetch("https://script.google.com/macros/s/AKfycbw2WWW5lWYuQCnQ4xjpzVDKcL1pYUnNONrNjK6gUirdBc8FLYqHFvBXssHnpnVQzul8IQ/exec", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: username,
+        reward: prizes[prizeIndex]
+      })
+    });
   }, { once: true });
 });

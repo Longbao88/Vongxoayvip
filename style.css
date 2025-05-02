@@ -104,3 +104,30 @@ h1 {
 .promo-banner a:hover {
   color: #fff;
 }
+
+.group-banner {
+  margin-top: 15px;
+  padding: 12px;
+  background: linear-gradient(to right, #000, #ffcc00, #000);
+  color: #000;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  animation: glow 1.5s infinite ease-in-out alternate;
+}
+.group-banner a {
+  color: #ff0000;
+  text-decoration: none;
+}
+.group-banner a:hover {
+  text-decoration: underline;
+  color: #fff;
+}
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px gold;
+  }
+  to {
+    box-shadow: 0 0 20px red;
+  }
+}
