@@ -72,7 +72,7 @@ document.getElementById("spin-btn").addEventListener("click", async () => {
   });
   const result = await response.text();
 
-  if (result === "EXISTS") {
+  if (result.trim() === "Tài khoản đã quay rồi.") {
     msg.textContent = "Tài khoản này đã quay!";
     msg.style.color = "red";
     return;
