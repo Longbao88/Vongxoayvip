@@ -87,3 +87,20 @@ h1 {
   width: 120px;
   z-index: 2;
 }
+.promo-banner {
+  margin-top: 20px;
+  font-size: 18px;
+  background: rgba(255, 215, 0, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid gold;
+  color: #ffd700;
+}
+.promo-banner a {
+  color: #ff9800;
+  text-decoration: underline;
+  font-weight: bold;
+}
+.promo-banner a:hover {
+  color: #fff;
+}
